@@ -104,20 +104,20 @@ public class PulsarConnectorCache {
     }
 
     private ManagedLedgerFactory initManagedLedgerFactory(PulsarConnectorConfig pulsarConnectorConfig)
-            throws Exception {
+        throws Exception {
         PulsarMetadataClientDriver.init();
 
         ClientConfiguration bkClientConfiguration = new ClientConfiguration()
-                .setMetadataServiceUri("metadata-store:" + pulsarConnectorConfig.getMetadataUrl())
-                .setClientTcpNoDelay(false)
-                .setUseV2WireProtocol(pulsarConnectorConfig.getBookkeeperUseV2Protocol())
-                .setExplictLacInterval(pulsarConnectorConfig.getBookkeeperExplicitInterval())
-                .setStickyReadsEnabled(false)
-                .setReadEntryTimeout(60)
-                .setThrottleValue(pulsarConnectorConfig.getBookkeeperThrottleValue())
-                .setNumIOThreads(pulsarConnectorConfig.getBookkeeperNumIOThreads())
-                .setNumWorkerThreads(pulsarConnectorConfig.getBookkeeperNumWorkerThreads())
-                .setNettyMaxFrameSizeBytes(pulsarConnectorConfig.getMaxMessageSize() + Commands.MESSAGE_SIZE_FRAME_PADDING);
+            .setMetadataServiceUri("metadata-store:" + pulsarConnectorConfig.getMetadataUrl())
+            .setClientTcpNoDelay(false)
+            .setUseV2WireProtocol(pulsarConnectorConfig.getBookkeeperUseV2Protocol())
+            .setExplictLacInterval(pulsarConnectorConfig.getBookkeeperExplicitInterval())
+            .setStickyReadsEnabled(false)
+            .setReadEntryTimeout(60)
+            .setThrottleValue(pulsarConnectorConfig.getBookkeeperThrottleValue())
+            .setNumIOThreads(pulsarConnectorConfig.getBookkeeperNumIOThreads())
+            .setNumWorkerThreads(pulsarConnectorConfig.getBookkeeperNumWorkerThreads())
+            .setNettyMaxFrameSizeBytes(pulsarConnectorConfig.getMaxMessageSize() + Commands.MESSAGE_SIZE_FRAME_PADDING);
 
         ManagedLedgerFactoryConfig managedLedgerFactoryConfig = new ManagedLedgerFactoryConfig();
         managedLedgerFactoryConfig.setMaxCacheSize(pulsarConnectorConfig.getManagedLedgerCacheSizeMB());
@@ -149,9 +149,9 @@ public class PulsarConnectorCache {
     }
 
     private void initOffloaderScheduler(OffloadPoliciesImpl offloadPolicies) {
-        this.offloaderScheduler = OrderedScheduler.newSchedulerBuilder()
-                .numThreads(offloadPolicies.getManagedLedgerOffloadMaxThreads())
-                .name("pulsar-offloader").build();
+            this.offloaderScheduler = OrderedScheduler.newSchedulerBuilder()
+                    .numThreads(offloadPolicies.getManagedLedgerOffloadMaxThreads())
+                    .name("pulsar-offloader").build();
     }
 
     private LedgerOffloader initManagedLedgerOffloader(OffloadPoliciesImpl offloadPolicies,
@@ -169,12 +169,12 @@ public class PulsarConnectorCache {
 
                 try {
                     return offloaderFactory.create(
-                            offloadPolicies,
-                            ImmutableMap.of(
-                                    LedgerOffloader.METADATA_SOFTWARE_VERSION_KEY.toLowerCase(), PulsarVersion.getVersion(),
-                                    LedgerOffloader.METADATA_SOFTWARE_GITSHA_KEY.toLowerCase(), PulsarVersion.getGitSha()
-                            ),
-                            this.offloaderScheduler, this.offloaderStats);
+                        offloadPolicies,
+                        ImmutableMap.of(
+                            LedgerOffloader.METADATA_SOFTWARE_VERSION_KEY.toLowerCase(), PulsarVersion.getVersion(),
+                            LedgerOffloader.METADATA_SOFTWARE_GITSHA_KEY.toLowerCase(), PulsarVersion.getGitSha()
+                        ),
+                        this.offloaderScheduler, this.offloaderStats);
                 } catch (IOException ioe) {
                     log.error("Failed to create offloader: ", ioe);
                     throw new RuntimeException(ioe.getMessage(), ioe.getCause());

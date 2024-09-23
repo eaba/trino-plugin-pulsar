@@ -26,17 +26,23 @@ public class PulsarTopicDescription
     private final String tableName;
     private final String topicName;
     private final String schemaName;
+    private final Optional<PulsarTopicFieldGroup> key;
+    private final Optional<PulsarTopicFieldGroup> message;
 
     @JsonCreator
     public PulsarTopicDescription(
             @JsonProperty("tableName") String tableName,
             @JsonProperty("schemaName") String schemaName,
-            @JsonProperty("topicName") String topicName)
+            @JsonProperty("topicName") String topicName, 
+            @JsonProperty("key") Optional<PulsarTopicFieldGroup> key,
+            @JsonProperty("message") Optional<PulsarTopicFieldGroup> message)
     {
         checkArgument(!isNullOrEmpty(tableName), "tableName is null or is empty");
         this.tableName = tableName;
         this.topicName = requireNonNull(topicName, "topicName is null");
         this.schemaName = requireNonNull(schemaName, "topicName is null");
+        this.key = key;
+        this.message = message;
     }
 
     @JsonProperty
@@ -57,6 +63,17 @@ public class PulsarTopicDescription
         return schemaName;
     }
 
+    @JsonProperty
+    public String getKey()
+    {
+        return key;
+    }
+
+    @JsonProperty
+    public String getMessage()
+    {
+        return message;
+    }
     @Override
     public String toString()
     {
@@ -64,6 +81,8 @@ public class PulsarTopicDescription
                 .add("tableName", tableName)
                 .add("topicName", topicName)
                 .add("schemaName", schemaName)
+                .add("key", key)
+                .add("message", message)
                 .toString();
     }
 }

@@ -26,8 +26,10 @@ import static java.util.Objects.requireNonNull;
 public class PulsarTableHandle
         implements ConnectorTableHandle
 {
-    private final String catalogName;
-
+    /**
+     * Connector id.
+     */
+    private final String connectorId;
     /**
      * The schema name for this table.
      */
@@ -42,24 +44,36 @@ public class PulsarTableHandle
      * The topic name that is read from Pulsar.
      */
     private final String topicName;
+/**
+     * The key message used by Trino.
+     */
+    //private final Optional<PulsarTopicFieldGroup> key;
+
+    /**
+     * The message used by Trino.
+     */
+    //private final Optional<PulsarTopicFieldGroup> message;
 
     @JsonCreator
     public PulsarTableHandle(
-            @JsonProperty("catalogName") String catalogName,
+            @JsonProperty("connectorId") String connectorId,
             @JsonProperty("schemaName") String schemaName,
             @JsonProperty("tableName") String tableName,
-            @JsonProperty("topicName") String topicName)
+            @JsonProperty("topicName") String topicName/*, 
+            @JsonProperty("key") Optional<PulsarTopicFieldGroup> key,
+            @JsonProperty("message") Optional<PulsarTopicFieldGroup> message*/)
     {
-        this.catalogName = requireNonNull(catalogName, "catalogName is null");
+        this.connectorId = requireNonNull(connectorId, "connectorId is null");
         this.schemaName = requireNonNull(schemaName, "schemaName is null");
         this.tableName = requireNonNull(tableName, "tableName is null");
         this.topicName = requireNonNull(topicName, "topicName is null");
+        this.key = key;
+        this.message = message;
     }
 
     @JsonProperty
-    public String getCatalogName()
-    {
-        return catalogName;
+    public String getConnectorId() {
+        return connectorId;
     }
 
     @JsonProperty
@@ -85,33 +99,43 @@ public class PulsarTableHandle
         return new SchemaTableName(schemaName, tableName);
     }
 
-    @Override
-    public boolean equals(Object o)
+   /* @JsonProperty
+    public String getKey()
     {
-        if (this == o) {
+        return key;
+    }
+
+    @JsonProperty
+    public String getMessage()
+    {
+        return message;
+    }*/
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(connectorId, schemaName, tableName, topicName);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (!(o instanceof PulsarTableHandle)) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        PulsarTableHandle that = (PulsarTableHandle) o;
-        return getCatalogName().equals(that.getCatalogName()) &&
-                getSchemaName().equals(that.getSchemaName()) &&
-                getTableName().equals(that.getTableName()) &&
-                getTopicName().equals(that.getTopicName());
+
+        PulsarTableHandle other = (PulsarTableHandle) obj;
+        return Objects.equals(this.connectorId, other.connectorId)
+                && Objects.equals(this.schemaName, other.schemaName)
+                && Objects.equals(this.tableName, other.tableName)
+                && Objects.equals(this.topicName, other.topicName);
     }
 
     @Override
-    public int hashCode()
-    {
-        return Objects.hash(getCatalogName(), getSchemaName(), getTableName(), getTopicName());
-    }
-
-    @Override
-    public String toString()
-    {
+    public String toString() {
         return toStringHelper(this)
-                .add("catalogName", catalogName)
+                .add("connectorId", connectorId)
                 .add("schemaName", schemaName)
                 .add("tableName", tableName)
                 .add("topicName", topicName)

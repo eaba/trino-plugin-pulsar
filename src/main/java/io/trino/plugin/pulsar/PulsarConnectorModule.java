@@ -28,28 +28,27 @@ import io.trino.spi.type.TypeManager;
 import javax.inject.Inject;
 
 /**
- * Defines binding of classes in the Trino connector.
+ * This class defines binding of classes in the Presto connector.
  */
-public class PulsarConnectorModule
-        implements Module
-{
-    //private final String catalogName;
+public class PulsarConnectorModule implements Module {
+
     private final String connectorId;
     private final TypeManager typeManager;
 
-    public PulsarConnectorModule(String connectorId,
-                                 TypeManager typeManager)
-    {
-        //this.catalogName = requireNonNull(catalogName, "catalogName id is null");
+    public PulsarConnectorModule(String connectorId, TypeManager typeManager) {
         this.connectorId = requireNonNull(connectorId, "connector id is null");
         this.typeManager = requireNonNull(typeManager, "typeManager is null");
     }
 
     @Override
-    public void configure(Binder binder)
-    {
+    public void configure(Binder binder) {
+        /*binder.bind(ConnectorMetadata.class).annotatedWith(ForClassLoaderSafe.class).to(PulsarMetadata.class).in(Scopes.SINGLETON);
+        binder.bind(ConnectorMetadata.class).to(ClassLoaderSafeConnectorMetadata.class).in(Scopes.SINGLETON);
+        binder.bind(ConnectorSplitManager.class).annotatedWith(ForClassLoaderSafe.class).to(PulsarSplitManager.class).in(Scopes.SINGLETON);
+        binder.bind(ConnectorSplitManager.class).to(ClassLoaderSafeConnectorSplitManager.class).in(Scopes.SINGLETON);
+        binder.bind(ConnectorRecordSetProvider.class).annotatedWith(ForClassLoaderSafe.class).to(PulsarRecordSetProvider.class).in(Scopes.SINGLETON);
+        binder.bind(ConnectorRecordSetProvider.class).to(ClassLoaderSafeConnectorRecordSetProvider.class).in(Scopes.SINGLETON);*/
         binder.bind(TypeManager.class).toInstance(typeManager);
-        //binder.bind(CatalogName.class).toInstance(new CatalogName(catalogName));
 
         binder.bind(PulsarConnector.class).in(Scopes.SINGLETON);
         binder.bind(PulsarConnectorId.class).toInstance(new PulsarConnectorId(connectorId));
@@ -66,7 +65,9 @@ public class PulsarConnectorModule
         jsonBinder(binder).addDeserializerBinding(Type.class).to(TypeDeserializer.class);
 
         binder.install(new DecoderModule());
+
     }
+
     /**
      * A wrapper to deserialize the Presto types.
      */

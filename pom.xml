@@ -41,7 +41,7 @@
         <assertj-core.version>3.24.2</assertj-core.version>
         <jetty.version>9.4.53.v20231009</jetty.version>
     </properties>
-
+<dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>io.airlift</groupId>
@@ -254,6 +254,237 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-
+    </dependencyManagement>
+    <build>
+       <pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.2</version>
+                <configuration>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <attach>true</attach>
+                    <tarLongFileMode>posix</tarLongFileMode>
+                    <descriptors>
+                        <descriptor>src/assembly/assembly.xml</descriptor>
+                    </descriptors>
+                     <!-- TODO: these should use https://junit.org/junit5/docs/current/user-guide/#running-tests-build-maven-config-params -->
+                    <!-- use system properties to work around https://youtrack.jetbrains.com/issue/IDEA-339034 -->
+                    <systemPropertyVariables>
+                        <junit.jupiter.execution.timeout.thread.mode.default>SEPARATE_THREAD</junit.jupiter.execution.timeout.thread.mode.default>
+                        <junit.jupiter.extensions.autodetection.enabled>true</junit.jupiter.extensions.autodetection.enabled>
+                        <junit.jupiter.execution.parallel.enabled>true</junit.jupiter.execution.parallel.enabled>
+                        <junit.jupiter.execution.parallel.mode.default>concurrent</junit.jupiter.execution.parallel.mode.default>
+                        <junit.jupiter.execution.parallel.mode.classes.default>concurrent</junit.jupiter.execution.parallel.mode.classes.default>
+                    </systemPropertyVariables>
+                    <includes>
+                        <!-- Tests classes should start with "Test", but we do also want to include tests incorrectly named, with "Test" at the end -->
+                        <include>**/Test*.java</include>
+                        <include>**/*Test.java</include>
+                        <!--<include>**/Benchmark*.java</include>-->
+                    </includes>
+                    <excludes>
+                        <exclude>**/*jmhTest*.java</exclude>
+                        <exclude>**/*jmhType*.java</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        </pluginManagement>
+    </build>
+    <profiles>
+        <profile>
+            <id>errorprone-compiler</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <!--suppress MavenModelInspection -->
+                        <configuration combine.children="merge">
+                            <!-- forking not required due to JVM flags in .mvn/jvm.config -->
+                            <!-- see https://errorprone.info/docs/installation#maven -->
+                            <!-- Do not fail on error-prone's warnings even for modules using air.compiler.fail-warnings -->
+                            <!-- TODO silence warnings we choose to ignore and raise important warnings to error and then remove <failOnWarning> -->
+                            <failOnWarning>false</failOnWarning>
+                            <compilerArgs>
+                                <arg>-XDcompilePolicy=simple</arg>
+                                <arg>
+                                    -Xplugin:ErrorProne \
+                                    -Xep:AlmostJavadoc:ERROR \
+                                    -Xep:AmbiguousMethodReference:ERROR \
+                                    -Xep:AnnotateFormatMethod:ERROR \
+                                    -Xep:ArgumentSelectionDefectChecker:ERROR \
+                                    -Xep:ArrayAsKeyOfSetOrMap:ERROR \
+                                    -Xep:AssertEqualsArgumentOrderChecker:ERROR \
+                                    -Xep:AssertThrowsMultipleStatements:ERROR \
+                                    -Xep:AssertionFailureIgnored:ERROR \
+                                    -Xep:AttemptedNegativeZero:ERROR \
+                                    -Xep:BadComparable:ERROR \
+                                    -Xep:BadInstanceof:ERROR \
+                                    -Xep:BigDecimalEquals:ERROR \
+                                    -Xep:BoxedPrimitiveConstructor:ERROR \
+                                    -Xep:ByteBufferBackingArray:ERROR \
+                                    -Xep:CacheLoaderNull:ERROR \
+                                    -Xep:CatchAndPrintStackTrace:ERROR \
+                                    -Xep:CatchFail:ERROR \
+                                    -Xep:ClassCanBeStatic:ERROR \
+                                    -Xep:ClassName:ERROR \
+                                    -Xep:ClassNewInstance:ERROR \
+                                    -Xep:CollectionUndefinedEquality:ERROR \
+                                    -Xep:CollectorShouldNotUseState:ERROR \
+                                    -Xep:CompareToZero:ERROR \
+                                    -Xep:DateChecker:ERROR \
+                                    -Xep:DateFormatConstant:ERROR \
+                                    -Xep:DefaultCharset:ERROR \
+                                    -Xep:DepAnn:ERROR \
+                                    -Xep:DeprecatedVariable:ERROR \
+                                    -Xep:DistinctVarargsChecker:ERROR \
+                                    -Xep:DoNotCallSuggester:OFF \
+                                    -Xep:DoubleCheckedLocking:ERROR \
+                                    -Xep:EmptyBlockTag:ERROR \
+                                    -Xep:EmptySetMultibindingContributions:ERROR \
+                                    <!-- we would rather want the opposite check -->
+                                    -Xep:EqualsGetClass:OFF \
+                                    -Xep:EqualsIncompatibleType:ERROR \
+                                    -Xep:EqualsUnsafeCast:ERROR \
+                                    -Xep:EqualsUsingHashCode:ERROR \
+                                    -Xep:ErroneousBitwiseExpression:ERROR \
+                                    -Xep:ErroneousThreadPoolConstructorChecker:ERROR \
+                                    -Xep:EscapedEntity:ERROR \
+                                    -Xep:ExtendingJUnitAssert:ERROR \
+                                    -Xep:ExtendsObject:ERROR \
+                                    -Xep:FallThrough:ERROR \
+                                    -Xep:Finalize:ERROR \
+                                    -Xep:GetClassOnEnum:ERROR \
+                                    <!-- TODO enable globally -->
+                                    -Xep:GuardedBy:${trino.error-prone.guarded-by} \
+                                    -Xep:HidingField:ERROR \
+                                    -Xep:JavaTimeDefaultTimeZone:OFF \
+                                    <!-- covered by Modernizer -->
+                                    -Xep:JdkObsolete:OFF \
+                                    <!-- This check requires list fields to be declared as ImmutableList, which is not in line with project's code style -->
+                                    -Xep:Immutable:OFF \
+                                    <!-- flags enums with List fields even if initialized with ImmutableList, and other false positives -->
+                                    -Xep:ImmutableEnumChecker:OFF \
+                                    -Xep:ImmutableSetForContains:ERROR \
+                                    <!-- fields/variables should not differ only in case -->
+                                    -Xep:InconsistentCapitalization:ERROR \
+                                    -Xep:InconsistentHashCode:ERROR \
+                                    -Xep:InjectOnConstructorOfAbstractClass:ERROR \
+                                    -Xep:InvalidInlineTag:ERROR \
+                                    -Xep:MissingCasesInEnumSwitch:ERROR \
+                                    -Xep:MissingOverride:ERROR \
+                                    <!-- Sometimes our javadoc contains just a @see directive -->
+                                    -Xep:MissingSummary:OFF \
+                                    -Xep:ModifiedButNotUsed:ERROR \
+                                    -Xep:MutablePublicArray:ERROR \
+                                    -Xep:NarrowCalculation:ERROR \
+                                    -Xep:NarrowingCompoundAssignment:ERROR \
+                                    -Xep:NullOptional:ERROR \
+                                    -Xep:NullableOptional:ERROR \
+                                    -Xep:NullablePrimitive:ERROR \
+                                    -Xep:ObjectEqualsForPrimitives:ERROR \
+                                    -Xep:ObjectToString:ERROR \
+                                    -Xep:OptionalNotPresent:ERROR \
+                                    -Xep:OrphanedFormatString:ERROR \
+                                    -Xep:Overrides:ERROR \
+                                    <!-- flags List fields even if initialized with ImmutableList -->
+                                    -Xep:PreferredInterfaceType:OFF \
+                                    -Xep:PrimitiveArrayPassedToVarargsMethod:ERROR \
+                                    -Xep:RethrowReflectiveOperationExceptionAsLinkageError:OFF \
+                                    -Xep:StaticAssignmentOfThrowable:ERROR \
+                                    -Xep:StaticGuardedByInstance:ERROR \
+                                    -Xep:StreamResourceLeak:ERROR \
+                                    -Xep:StringCaseLocaleUsage:ERROR \
+                                    -Xep:SuppressWarningsDeprecated:ERROR \
+                                    -Xep:ThreeLetterTimeZoneID:ERROR \
+                                    -Xep:UnicodeEscape:ERROR \
+                                    -Xep:UnnecessaryLongToIntConversion:ERROR \
+                                    -Xep:UnnecessaryMethodReference:ERROR \
+                                    -Xep:UnnecessaryOptionalGet:ERROR \
+                                    -Xep:UnnecessaryParentheses:ERROR \
+                                    -Xep:UnnecessaryStringBuilder:ERROR \
+                                    -Xep:UnusedMethod:OFF \
+                                    -Xep:UnusedVariable:ERROR \
+                                    -Xep:UseEnumSwitch:ERROR \
+                                    -XepExcludedPaths:.*/target/generated-(|test-)sources/.*
+                                </arg>
+                            </compilerArgs>
+                            <annotationProcessorPaths>
+                                <path>
+                                    <groupId>com.google.errorprone</groupId>
+                                    <artifactId>error_prone_core</artifactId>
+                                    <version>${dep.errorprone.version}</version>
+                                </path>
+                            </annotationProcessorPaths>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!-- Allow to run goals with an empty local Maven repository -->
+            <id>disable-check-spi-dependencies</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.trino</groupId>
+                        <artifactId>trino-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-check-spi-dependencies</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>gib</id>
+            <properties>
+                <!-- the *local* master, not refs/remotes/... -->
+                <gib.referenceBranch>master</gib.referenceBranch>
+                <!-- set as properties, not configuration, to allow overriding them -->
+                <gib.buildDownstream>true</gib.buildDownstream>
+                <gib.buildUpstream>true</gib.buildUpstream>
+                <gib.disableIfBranchMatches>master</gib.disableIfBranchMatches>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.github.gitflow-incremental-builder</groupId>
+                        <artifactId>gitflow-incremental-builder</artifactId>
+                        <version>4.5.1</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <compareToMergeBase>true</compareToMergeBase>
+                            <uncommitted>true</uncommitted>
+                            <untracked>true</untracked>
+                            <buildUpstreamMode>impacted</buildUpstreamMode>
+                            <!-- Skip tests and checks for upstream modules since they have not been modified but are still required to be built -->
+                            <skipTestsForUpstreamModules>true</skipTestsForUpstreamModules>
+                            <argsForUpstreamModules>-Dmaven.source.skip=true -Dair.check.skip-all</argsForUpstreamModules>
+                            <!-- Any modules selected with -pl will be built fully (with tests etc.) if the selected module itself is changed
+                            or one of its (non-selected) upstream modules -->
+                            <disableSelectedProjectsHandling>true</disableSelectedProjectsHandling>
+                            <failOnMissingGitDir>true</failOnMissingGitDir>
+                            <failOnError>true</failOnError>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

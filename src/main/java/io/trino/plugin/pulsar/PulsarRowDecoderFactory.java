@@ -15,28 +15,24 @@ package io.trino.plugin.pulsar;
 
 import io.trino.decoder.DecoderColumnHandle;
 import io.trino.spi.connector.ColumnMetadata;
-import org.apache.pulsar.common.naming.TopicName;
-import org.apache.pulsar.common.schema.SchemaInfo;
-
 import java.util.List;
 import java.util.Set;
+import org.apache.pulsar.common.naming.TopicName;
+import org.apache.pulsar.common.schema.SchemaInfo;
 
 /**
  * Pulsar customized RowDecoderFactory interface.
  */
-public interface PulsarRowDecoderFactory
-{
+public interface PulsarRowDecoderFactory {
+
     /**
      * extract ColumnMetadata from pulsar SchemaInfo and HandleKeyValueType.
      * @param schemaInfo
      * @param handleKeyValueType
      * @return
      */
-    List<ColumnMetadata> extractColumnMetadata(
-            TopicName topicName,
-            SchemaInfo schemaInfo,
-            PulsarColumnHandle.HandleKeyValueType handleKeyValueType,
-            boolean withInternalProperties);
+    List<ColumnMetadata> extractColumnMetadata(TopicName topicName, SchemaInfo schemaInfo,
+                                               PulsarColumnHandle.HandleKeyValueType handleKeyValueType);
 
     /**
      * createRowDecoder RowDecoder by pulsar SchemaInfo and column DecoderColumnHandles.
@@ -44,8 +40,7 @@ public interface PulsarRowDecoderFactory
      * @param columns
      * @return
      */
-    PulsarRowDecoder createRowDecoder(
-            TopicName topicName,
-            SchemaInfo schemaInfo,
-            Set<DecoderColumnHandle> columns);
+    PulsarRowDecoder createRowDecoder(TopicName topicName, SchemaInfo schemaInfo,
+                                      Set<DecoderColumnHandle> columns);
+
 }

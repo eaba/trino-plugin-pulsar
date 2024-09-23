@@ -33,8 +33,10 @@ public class PulsarConnectorUtils {
         return parser.parse(schemaJson);
     }
 
-    public static boolean isPartitionedTopic(TopicName topicName, PulsarAdmin pulsarAdmin) throws PulsarAdminException {
-        return pulsarAdmin.topics().getPartitionedTopicMetadata(topicName.toString()).partitions > 0;
+    public static boolean isPartitionedTopic(TopicName topicName, PulsarConnectorConfig pulsarConnectorConfig) throws PulsarAdminException {
+        try (PulsarAdmin pulsarAdmin = PulsarAdminClientProvider.getPulsarAdmin(pulsarConnectorConfig)) {
+            return pulsarAdmin.topics().getPartitionedTopicMetadata(topicName.toString()).partitions > 0;
+        }
     }
 
     /**
@@ -93,4 +95,5 @@ public class PulsarConnectorUtils {
                 ? namespace.replace(config.getRewriteNamespaceDelimiter(), "/")
                 : namespace;
     }
+
 }

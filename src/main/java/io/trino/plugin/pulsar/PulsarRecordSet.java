@@ -13,36 +13,29 @@
  */
 package io.trino.plugin.pulsar;
 
+import static java.util.Objects.requireNonNull;
 import com.google.common.collect.ImmutableList;
 import io.trino.spi.connector.RecordCursor;
 import io.trino.spi.connector.RecordSet;
 import io.trino.spi.type.Type;
-
 import java.util.List;
 
-import static java.util.Objects.requireNonNull;
+/**
+ * Implementation of a record set.
+ */
+public class PulsarRecordSet implements RecordSet {
 
-public class PulsarRecordSet
-        implements RecordSet
-{
     private final List<PulsarColumnHandle> columnHandles;
     private final List<Type> columnTypes;
     private final PulsarSplit pulsarSplit;
     private final PulsarConnectorConfig pulsarConnectorConfig;
-    private final PulsarConnectorCache pulsarConnectorManagedLedgerFactory;
 
     private PulsarDispatchingRowDecoderFactory decoderFactory;
 
-    public PulsarRecordSet(
-            PulsarSplit split,
-            List<PulsarColumnHandle> columnHandles,
-            PulsarConnectorConfig pulsarConnectorConfig,
-            PulsarDispatchingRowDecoderFactory decoderFactory,
-            PulsarConnectorCache pulsarConnectorManagedLedgerFactory)
-    {
+    public PulsarRecordSet(PulsarSplit split, List<PulsarColumnHandle> columnHandles, PulsarConnectorConfig
+            pulsarConnectorConfig, PulsarDispatchingRowDecoderFactory decoderFactory) {
         requireNonNull(split, "split is null");
         this.columnHandles = requireNonNull(columnHandles, "column handles is null");
-        this.pulsarConnectorManagedLedgerFactory = requireNonNull(pulsarConnectorManagedLedgerFactory, "pulsarConnectorManagedLedgerFactory is null");
         ImmutableList.Builder<Type> types = ImmutableList.builder();
         for (PulsarColumnHandle column : columnHandles) {
             types.add(column.getType());
@@ -56,15 +49,15 @@ public class PulsarRecordSet
         this.decoderFactory = decoderFactory;
     }
 
+
     @Override
-    public List<Type> getColumnTypes()
-    {
-        return columnTypes;
+    public List<Type> getColumnTypes() {
+        return this.columnTypes;
     }
 
     @Override
-    public RecordCursor cursor()
-    {
-        return new PulsarRecordCursor(columnHandles, pulsarSplit, pulsarConnectorConfig, decoderFactory, pulsarConnectorManagedLedgerFactory);
+    public RecordCursor cursor() {
+        return new PulsarRecordCursor(this.columnHandles, this.pulsarSplit,
+                this.pulsarConnectorConfig, this.decoderFactory);
     }
 }

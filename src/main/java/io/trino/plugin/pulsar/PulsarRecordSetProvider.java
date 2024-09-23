@@ -51,19 +51,25 @@ public class PulsarRecordSetProvider
 
     @Override
     public RecordSet getRecordSet(
-            ConnectorTransactionHandle transactionHandle,
-            ConnectorSession session,
-            ConnectorSplit split,
-            List<? extends ColumnHandle> columns)
+        ConnectorTransactionHandle transaction, 
+        ConnectorSession session, 
+        ConnectorSplit split, 
+        ConnectorTableHandle table, 
+        List<? extends ColumnHandle> columns)
     {
         requireNonNull(split, "Connector split is null");
         PulsarSplit pulsarSplit = (PulsarSplit) split;
 
-        ImmutableList.Builder<PulsarColumnHandle> handles = ImmutableList.builder();
+        List<PulsarColumnHandle> pulsarColumns = columns.stream()
+                .map(PulsarColumnHandle.class::cast)
+                .collect(toImmutableList());
+
+        /*ImmutableList.Builder<PulsarColumnHandle> handles = ImmutableList.builder();
         for (ColumnHandle handle : columns) {
             handles.add((PulsarColumnHandle) handle);
-        }
+        }*/
 
-        return new PulsarRecordSet(pulsarSplit, handles.build(), pulsarConnectorConfig, decoderFactory, pulsarConnectorManagedLedgerFactory);
+        //return new PulsarRecordSet(pulsarSplit, handles.build(), pulsarConnectorConfig, decoderFactory, pulsarConnectorManagedLedgerFactory);
+        return new PulsarRecordSet(pulsarSplit, pulsarColumns, pulsarConnectorConfig, decoderFactory, pulsarConnectorManagedLedgerFactory);
     }
 }

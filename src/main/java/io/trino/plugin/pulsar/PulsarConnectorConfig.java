@@ -287,7 +287,7 @@ public class PulsarConnectorConfig implements AutoCloseable {
 
     @Config("pulsar.managed-ledger-offload-max-threads")
     public PulsarConnectorConfig setManagedLedgerOffloadMaxThreads(int managedLedgerOffloadMaxThreads)
-            throws IOException {
+        throws IOException {
         this.managedLedgerOffloadMaxThreads = managedLedgerOffloadMaxThreads;
         return this;
     }
@@ -534,14 +534,14 @@ public class PulsarConnectorConfig implements AutoCloseable {
 
     @Override
     public String toString() {
-        if (StringUtils.isEmpty(webServiceUrl)){
-            return "PulsarConnectorConfig{"
-                    + "brokerServiceUrl='" + brokerServiceUrl + '\''
-                    + '}';
+       if (StringUtils.isEmpty(webServiceUrl)){
+           return "PulsarConnectorConfig{"
+            + "brokerServiceUrl='" + brokerServiceUrl + '\''
+            + '}';
         } else {
             return "PulsarConnectorConfig{"
-                    + "brokerServiceUrl='" + webServiceUrl + '\''
-                    + '}';
+            + "brokerServiceUrl='" + webServiceUrl + '\''
+            + '}';
         }
     }
 }

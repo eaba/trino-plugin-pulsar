@@ -37,10 +37,10 @@ public class PulsarInternalColumn {
             IntegerType.INTEGER, "The partition number which the message belongs to");
 
     public static final PulsarInternalColumn EVENT_TIME = new PulsarInternalColumn("__event_time__",
-            TimestampType.TIMESTAMP, "Application defined timestamp in milliseconds of when the event occurred");
+            TimestampType.TIMESTAMP_MILLIS, "Application defined timestamp in milliseconds of when the event occurred");
 
     public static final PulsarInternalColumn PUBLISH_TIME = new PulsarInternalColumn("__publish_time__",
-            TimestampType.TIMESTAMP, "The timestamp in milliseconds of when event as published");
+            TimestampType.TIMESTAMP_MILLIS, "The timestamp in milliseconds of when event as published");
 
     public static final PulsarInternalColumn MESSAGE_ID = new PulsarInternalColumn("__message_id__",
             VarcharType.VARCHAR, "The message ID of the message used to generate this row");

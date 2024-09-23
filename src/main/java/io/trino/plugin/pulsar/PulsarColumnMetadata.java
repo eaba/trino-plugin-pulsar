@@ -77,11 +77,11 @@ public class PulsarColumnMetadata extends ColumnMetadata {
     @Override
     public String toString() {
         return "PulsarColumnMetadata{"
-                + "isInternal=" + isInternal
-                + ", nameWithCase='" + nameWithCase + '\''
-                + ", handleKeyValueType=" + handleKeyValueType
-                + ", decoderExtraInfo=" + decoderExtraInfo.toString()
-                + '}';
+            + "isInternal=" + isInternal
+            + ", nameWithCase='" + nameWithCase + '\''
+            + ", handleKeyValueType=" + handleKeyValueType
+            + ", decoderExtraInfo=" + decoderExtraInfo.toString()
+            + '}';
     }
 
     @Override
@@ -212,4 +212,3 @@ public class PulsarColumnMetadata extends ColumnMetadata {
 
 
 }
-

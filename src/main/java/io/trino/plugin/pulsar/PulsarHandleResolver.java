@@ -13,6 +13,8 @@
  */
 package io.trino.plugin.pulsar;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 import io.trino.spi.connector.ColumnHandle;
 import io.trino.spi.connector.ConnectorHandleResolver;
 import io.trino.spi.connector.ConnectorSplit;
@@ -20,70 +22,58 @@ import io.trino.spi.connector.ConnectorTableHandle;
 import io.trino.spi.connector.ConnectorTableLayoutHandle;
 import io.trino.spi.connector.ConnectorTransactionHandle;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Objects.requireNonNull;
-
 /**
- * This class helps to resolve classes for the Trino Pulsar connector.
+ * This class helps to resolve classes for the Presto connector.
  */
-public class PulsarHandleResolver
-        implements ConnectorHandleResolver
-{
+public class PulsarHandleResolver implements ConnectorHandleResolver {
     @Override
-    public Class<? extends ConnectorTableHandle> getTableHandleClass()
-    {
+    public Class<? extends ConnectorTableHandle> getTableHandleClass() {
         return PulsarTableHandle.class;
     }
 
     @Override
-    public Class<? extends ConnectorTableLayoutHandle> getTableLayoutHandleClass()
-    {
+    public Class<? extends ConnectorTableLayoutHandle> getTableLayoutHandleClass() {
         return PulsarTableLayoutHandle.class;
     }
 
     @Override
-    public Class<? extends ColumnHandle> getColumnHandleClass()
-    {
+    public Class<? extends ColumnHandle> getColumnHandleClass() {
         return PulsarColumnHandle.class;
     }
 
     @Override
-    public Class<? extends ConnectorSplit> getSplitClass()
-    {
+    public Class<? extends ConnectorSplit> getSplitClass() {
         return PulsarSplit.class;
     }
 
-    static PulsarTableHandle convertTableHandle(ConnectorTableHandle tableHandle)
-    {
+    static PulsarTableHandle convertTableHandle(ConnectorTableHandle tableHandle) {
         requireNonNull(tableHandle, "tableHandle is null");
         checkArgument(tableHandle instanceof PulsarTableHandle, "tableHandle is not an instance of PulsarTableHandle");
         return (PulsarTableHandle) tableHandle;
     }
 
-    static PulsarColumnHandle convertColumnHandle(ColumnHandle columnHandle)
-    {
+    static PulsarColumnHandle convertColumnHandle(ColumnHandle columnHandle) {
         requireNonNull(columnHandle, "columnHandle is null");
-        checkArgument(columnHandle instanceof PulsarColumnHandle, "columnHandle is not an instance of PulsarColumnHandle");
+        checkArgument(columnHandle instanceof PulsarColumnHandle, "columnHandle is not an instance of "
+            + "PulsarColumnHandle");
         return (PulsarColumnHandle) columnHandle;
     }
 
-    static PulsarSplit convertSplit(ConnectorSplit split)
-    {
+    static PulsarSplit convertSplit(ConnectorSplit split) {
         requireNonNull(split, "split is null");
         checkArgument(split instanceof PulsarSplit, "split is not an instance of PulsarSplit");
         return (PulsarSplit) split;
     }
 
-    static PulsarTableLayoutHandle convertLayout(ConnectorTableLayoutHandle layout)
-    {
+    static PulsarTableLayoutHandle convertLayout(ConnectorTableLayoutHandle layout) {
         requireNonNull(layout, "layout is null");
-        checkArgument(layout instanceof PulsarTableLayoutHandle, "layout is not an instance of PulsarTableLayoutHandle");
+        checkArgument(layout instanceof PulsarTableLayoutHandle, "layout is not an instance of "
+            + "PulsarTableLayoutHandle");
         return (PulsarTableLayoutHandle) layout;
     }
 
     @Override
-    public Class<? extends ConnectorTransactionHandle> getTransactionHandleClass()
-    {
+    public Class<? extends ConnectorTransactionHandle> getTransactionHandleClass() {
         return PulsarTransactionHandle.class;
     }
 }

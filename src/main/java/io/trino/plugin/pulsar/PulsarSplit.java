@@ -13,47 +13,46 @@
  */
 package io.trino.plugin.pulsar;
 
+import static java.util.Objects.requireNonNull;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import io.trino.plugin.pulsar.util.OffloadPoliciesImpl;
+import io.airlift.log.Logger;
 import io.trino.spi.HostAddress;
 import io.trino.spi.connector.ColumnHandle;
 import io.trino.spi.connector.ConnectorSplit;
 import io.trino.spi.predicate.TupleDomain;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import org.apache.bookkeeper.mledger.impl.PositionImpl;
-import org.apache.pulsar.client.impl.schema.SchemaInfoImpl;
+import org.apache.pulsar.common.policies.data.OffloadPoliciesImpl;
 import org.apache.pulsar.common.schema.SchemaInfo;
 import org.apache.pulsar.common.schema.SchemaType;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
+/**
+ * This class represents information for a split.
+ */
+public class PulsarSplit implements ConnectorSplit {
 
-import static com.google.common.base.MoreObjects.toStringHelper;
-import static java.util.Objects.requireNonNull;
+    private static final Logger log = Logger.get(PulsarSplit.class);
 
-public class PulsarSplit
-        implements ConnectorSplit
-{
     private final long splitId;
-    private final String catalogName;
-    private final String tableName;
-    private final long splitSize;
-    private final TupleDomain<ColumnHandle> tupleDomain;
-
+    private final String connectorId;
     private final String schemaName;
     private final String originSchemaName;
+    private final String tableName;
+    private final long splitSize;
     private final String schema;
     private final SchemaType schemaType;
+    private final long startPositionEntryId;
+    private final long endPositionEntryId;
+    private final long startPositionLedgerId;
+    private final long endPositionLedgerId;
+    private final TupleDomain<ColumnHandle> tupleDomain;
     private final SchemaInfo schemaInfo;
 
-    private final long startPositionLedgerId;
-    private final long startPositionEntryId;
-    private final long endPositionLedgerId;
-    private final long endPositionEntryId;
     private final PositionImpl startPosition;
     private final PositionImpl endPosition;
     private final String schemaInfoProperties;
@@ -63,7 +62,7 @@ public class PulsarSplit
     @JsonCreator
     public PulsarSplit(
             @JsonProperty("splitId") long splitId,
-            @JsonProperty("catalogName") String catalogName,
+            @JsonProperty("connectorId") String connectorId,
             @JsonProperty("schemaName") String schemaName,
             @JsonProperty("originSchemaName") String originSchemaName,
             @JsonProperty("tableName") String tableName,
@@ -76,14 +75,12 @@ public class PulsarSplit
             @JsonProperty("endPositionLedgerId") long endPositionLedgerId,
             @JsonProperty("tupleDomain") TupleDomain<ColumnHandle> tupleDomain,
             @JsonProperty("schemaInfoProperties") String schemaInfoProperties,
-            @JsonProperty("offloadPolicies") OffloadPoliciesImpl offloadPolicies)
-            throws IOException
-    {
+            @JsonProperty("offloadPolicies") OffloadPoliciesImpl offloadPolicies) throws IOException {
         this.splitId = splitId;
         requireNonNull(schemaName, "schema name is null");
         this.originSchemaName = originSchemaName;
         this.schemaName = requireNonNull(schemaName, "schema name is null");
-        this.catalogName = requireNonNull(catalogName, "catalogName is null");
+        this.connectorId = requireNonNull(connectorId, "connector id is null");
         this.tableName = requireNonNull(tableName, "table name is null");
         this.splitSize = splitSize;
         this.schema = schema;
@@ -99,161 +96,133 @@ public class PulsarSplit
         this.offloadPolicies = offloadPolicies;
 
         ObjectMapper objectMapper = new ObjectMapper();
-        this.schemaInfo = SchemaInfoImpl.builder()
+        this.schemaInfo = SchemaInfo.builder()
                 .name(originSchemaName)
                 .type(schemaType)
-                .schema(schema.getBytes(StandardCharsets.ISO_8859_1))
+                .schema(schema.getBytes("ISO8859-1"))
                 .properties(objectMapper.readValue(schemaInfoProperties, Map.class))
                 .build();
     }
 
     @JsonProperty
-    public long getSplitId()
-    {
+    public long getSplitId() {
         return splitId;
     }
 
     @JsonProperty
-    public String getCatalogName()
-    {
-        return catalogName;
+    public String getConnectorId() {
+        return connectorId;
     }
 
     @JsonProperty
-    public String getSchemaName()
-    {
+    public String getSchemaName() {
         return schemaName;
     }
 
     @JsonProperty
-    public SchemaType getSchemaType()
-    {
+    public SchemaType getSchemaType() {
         return schemaType;
     }
 
     @JsonProperty
-    public String getTableName()
-    {
+    public String getTableName() {
         return tableName;
     }
 
     @JsonProperty
-    public long getSplitSize()
-    {
+    public long getSplitSize() {
         return splitSize;
     }
 
     @JsonProperty
-    public String getOriginSchemaName()
-    {
+    public String getOriginSchemaName() {
         return originSchemaName;
     }
 
     @JsonProperty
-    public String getSchema()
-    {
+    public String getSchema() {
         return schema;
     }
 
     @JsonProperty
-    public long getStartPositionEntryId()
-    {
+    public long getStartPositionEntryId() {
         return startPositionEntryId;
     }
 
     @JsonProperty
-    public long getEndPositionEntryId()
-    {
+    public long getEndPositionEntryId() {
         return endPositionEntryId;
     }
 
     @JsonProperty
-    public long getStartPositionLedgerId()
-    {
+    public long getStartPositionLedgerId() {
         return startPositionLedgerId;
     }
 
     @JsonProperty
-    public long getEndPositionLedgerId()
-    {
+    public long getEndPositionLedgerId() {
         return endPositionLedgerId;
     }
 
     @JsonProperty
-    public TupleDomain<ColumnHandle> getTupleDomain()
-    {
+    public TupleDomain<ColumnHandle> getTupleDomain() {
         return tupleDomain;
     }
 
-    public PositionImpl getStartPosition()
-    {
+    public PositionImpl getStartPosition() {
         return startPosition;
     }
 
-    public PositionImpl getEndPosition()
-    {
+    public PositionImpl getEndPosition() {
         return endPosition;
     }
 
     @JsonProperty
-    public String getSchemaInfoProperties()
-    {
+    public String getSchemaInfoProperties() {
         return schemaInfoProperties;
     }
 
     @JsonProperty
-    public OffloadPoliciesImpl getOffloadPolicies()
-    {
+    public OffloadPoliciesImpl getOffloadPolicies() {
         return offloadPolicies;
     }
 
-    public org.apache.pulsar.shade.org.apache.pulsar.common.policies.data.OffloadPoliciesImpl getOffloadPoliciesOriginType()
-    {
-        return offloadPolicies != null ? org.apache.pulsar.shade.org.apache.pulsar.common.policies.data
-                .OffloadPoliciesImpl.create(offloadPolicies.toProperties()) : null;
-    }
-
     @Override
-    public boolean isRemotelyAccessible()
-    {
+    public boolean isRemotelyAccessible() {
         return true;
     }
 
     @Override
-    public List<HostAddress> getAddresses()
-    {
+    public List<HostAddress> getAddresses() {
         return ImmutableList.of(HostAddress.fromParts("localhost", 12345));
     }
 
     @Override
-    public Object getInfo()
-    {
+    public Object getInfo() {
         return this;
     }
 
     @Override
-    public String toString()
-    {
-        return toStringHelper(this)
-                .add("splitId", splitId)
-                .add("catalogName", catalogName)
-                .add("originSchemaName", originSchemaName)
-                .add("schemaName", schemaName)
-                .add("tableName", tableName)
-                .add("splitSize", splitSize)
-                .add("schema", schema)
-                .add("schemaType", schemaType)
-                .add("startPositionEntryId", startPositionEntryId)
-                .add("endPositionEntryId", endPositionEntryId)
-                .add("startPositionLedgerId", startPositionLedgerId)
-                .add("endPositionLedgerId", endPositionLedgerId)
-                .add("schemaInfoProperties", schemaInfoProperties)
-                .add("offloadPolicies", (offloadPolicies == null ? null : offloadPolicies.toString()))
-                .toString();
+    public String toString() {
+        return "PulsarSplit{"
+            + "splitId=" + splitId
+            + ", connectorId='" + connectorId + '\''
+            + ", originSchemaName='" + originSchemaName + '\''
+            + ", schemaName='" + schemaName + '\''
+            + ", tableName='" + tableName + '\''
+            + ", splitSize=" + splitSize
+            + ", schema='" + schema + '\''
+            + ", schemaType=" + schemaType
+            + ", startPositionEntryId=" + startPositionEntryId
+            + ", endPositionEntryId=" + endPositionEntryId
+            + ", startPositionLedgerId=" + startPositionLedgerId
+            + ", endPositionLedgerId=" + endPositionLedgerId
+            + ", schemaInfoProperties=" + schemaInfoProperties
+            + (offloadPolicies == null ? "" : offloadPolicies.toString())
+            + '}';
     }
 
-    public SchemaInfo getSchemaInfo()
-    {
+    public SchemaInfo getSchemaInfo() {
         return schemaInfo;
     }
 }

@@ -140,7 +140,7 @@ public class PulsarConnectorMetricsTracker implements AutoCloseable{
             statsLoggerMessageQueueEnqueueWaitTime = statsLogger.getOpStatsLogger(MESSAGE_QUEUE_ENQUEUE_WAIT_TIME);
             statsLoggerNumMessagesDeserialized = statsLogger.getCounter(NUM_MESSAGES_DERSERIALIZED);
             statsLoggerNumMessagesDeserializedPerEntry = statsLogger
-                    .getOpStatsLogger(NUM_MESSAGES_DERSERIALIZED_PER_ENTRY);
+                .getOpStatsLogger(NUM_MESSAGES_DERSERIALIZED_PER_ENTRY);
             statsLoggerReadAttempts = statsLogger.getOpStatsLogger(READ_ATTEMPTS);
             statsLoggerReadLatencyPerBatch = statsLogger.getOpStatsLogger(READ_LATENCY_PER_BATCH);
             statsLoggerNumEntriesPerBatch = statsLogger.getOpStatsLogger(NUM_ENTRIES_PER_BATCH);
